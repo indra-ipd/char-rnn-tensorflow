@@ -118,7 +118,7 @@ class Model():
 
 
         # apply gradient change to the all the trainable variable.
-        self.train_op = optimizer.apply_gradients(zip(grads, tvars))
+        #self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
         # instrument tensorboard
         tf.summary.histogram('logits', self.logits)
