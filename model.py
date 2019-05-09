@@ -89,7 +89,33 @@ class Model():
         grads, _ = tf.clip_by_global_norm(tf.gradients(self.cost, tvars),
                 args.grad_clip)
         with tf.name_scope('optimizer'):
-            optimizer = tf.train.AdamOptimizer(self.lr)
+            #optimizer = tf.train.AdamOptimizer(self.lr)
+            import collections
+
+            mL = 10
+            mF = 100
+            sk_vec = collections.deque(maxlen=mL)
+            yk_vec = collections.deque(maxlen=mL)
+            F = collections.deque(maxlen=mF)
+            t_vec = collections.deque(maxlen=1)
+            iter_k = collections.deque(maxlen=1)
+            ws_vec = collections.deque(maxlen=1)
+            wo_bar_vec = collections.deque(maxlen=1)
+            old_fun_val = collections.deque(maxlen=1)
+            mu_val = collections.deque(maxlen=1)
+            iter_k.append(0)
+            t_vec.append(0)
+            
+            vk_vec = collections.deque(maxlen=1)
+            optimizer = tf.contrib.opt.ScipyOptimizerInterface(
+                loss, method='adaNAQ',
+                options={'disp': False, 'sk_vec': sk_vec, 'yk_vec': yk_vec, 't_vec': t_vec,
+                         'wo_bar_vec': wo_bar_vec,
+                         'ws_vec': ws_vec, 'vk_vec': vk_vec, 'F': F,
+                         'mu_val': mu_val, 'mu_fac': 1.1, 'mu_init': 0.1, 'mu_clip': 0.9,
+                         'alpha_k': 0.01, 'old_fun_val': old_fun_val, 'iter': iter_k})
+
+
 
         # apply gradient change to the all the trainable variable.
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
